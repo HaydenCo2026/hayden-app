@@ -220,7 +220,11 @@ def handle_not_found(query: str):
 
 # --- STREAMLIT UI ---
 
-st.set_page_config(page_title="Hayden", page_icon="👶")
+st.set_page_config(
+    page_title="Hayden",
+    page_icon="logo.jpg",
+    layout="centered",
+)
 
 # Custom CSS for seamless black theme and hidden avatars
 st.markdown("""
@@ -263,10 +267,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Display centered logo
-col1, col2, col3 = st.columns([1, 1, 1])
-with col2:
-    st.image("logo.jpg", width=200, use_container_width=False)
+# Display logo
+st.image("logo.jpg", width=200)
 
 st.title("Hayden")
 st.caption("Childcare Certification Support")
