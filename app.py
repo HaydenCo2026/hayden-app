@@ -407,7 +407,7 @@ else:
             st.markdown(f"**{label}** {message['content']}")
 
     # Chat input
-    if prompt := st.chat_input("Ask a safety question..."):
+    if prompt := st.chat_input("How can Hayden help you today?"):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(f"**You:** {prompt}")
@@ -417,6 +417,8 @@ else:
                 response = "No knowledge base loaded. Please add documents to the 'data/' folder."
                 st.markdown(f"**Hayden:** {response}")
         else:
+            # Limit history to last 5 messages to stay under rate limit
+            limited_history = st.session_state.messages[-5:]
             with st.spinner("Thinking..."):
                 try:
                     response = get_claude_response(
@@ -425,7 +427,7 @@ else:
                     # Clear image after use
                     st.session_state.current_image = None
                 except Exception as e:
-                    response = f"Error: {e}"
+                    response = "Hayden is currently handling a high volume of requests. Please try again in 30 seconds."
 
             if response.strip() == "NOT_FOUND":
                 with st.chat_message("assistant"):
