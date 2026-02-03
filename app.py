@@ -221,7 +221,7 @@ def handle_not_found(query: str):
 # --- STREAMLIT UI ---
 
 st.set_page_config(
-    page_title="Hayden",
+    page_title="Hayden | Child Safety & Care",
     page_icon="logo.jpg",
     layout="centered",
 )
@@ -268,9 +268,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Display logo
-st.image("logo.jpg", width=200)
+st.image("logo.jpg", width=150)
 
-st.title("Hayden")
+st.title("Welcome to Hayden")
 st.caption("Childcare Certification Support")
 
 # --- PHOTO SUPPORT SIDEBAR ---
