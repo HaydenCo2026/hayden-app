@@ -4,6 +4,7 @@ import time
 import streamlit as st
 import anthropic
 from pathlib import Path
+from typing import Optional
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -68,7 +69,7 @@ def load_context(data_folder: str = "data") -> str:
 
 # --- CLAUDE API ---
 
-def get_claude_response(user_query: str, context: str, image_base64: str = None) -> str:
+def get_claude_response(user_query: str, context: str, image_base64: Optional[str] = None) -> str:
     """Get a personalized answer from Claude using the provided context and optional image."""
     client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
@@ -139,7 +140,7 @@ def get_claude_response(user_query: str, context: str, image_base64: str = None)
     """
 
     # Build message content (text + optional image)
-    messages = []
+    messages: list[anthropic.types.MessageParam] = []
     if image_base64:
         messages.append({
             "role": "user",
@@ -165,7 +166,10 @@ def get_claude_response(user_query: str, context: str, image_base64: str = None)
         messages=messages,
     )
 
-    raw = response.content[0].text
+    content_block = response.content[0]
+    if not hasattr(content_block, 'text'):
+        return "Error: Unexpected response format from Claude."
+    raw = content_block.text
 
     # Parse structured response
     if raw.strip() == "NOT_FOUND":
