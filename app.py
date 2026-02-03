@@ -1,6 +1,7 @@
 import streamlit as st
 import anthropic
 import base64
+import os
 
 # 1. AUTHENTICATION & BRANDING
 client = anthropic.Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
@@ -19,6 +20,18 @@ def encode_image(image_file):
 
 # 2. UI SETUP (Minimalist/No Sidebar Clutter)
 st.set_page_config(page_title="Hayden", page_icon="👶")
+
+# --- LOGO RE-INSERTION ---
+current_dir = os.path.dirname(os.path.abspath(__file__))
+logo_path = os.path.join(current_dir, "logo.jpg")
+
+if os.path.exists(logo_path):
+    left_co, cent_co, last_co = st.columns([1, 1, 1])
+    with cent_co:
+        st.image(logo_path, width=150)
+else:
+    st.write("Logo file not found. Ensure logo.jpg is in the main folder.")
+
 st.markdown("<h1 style='text-align: center;'>Hayden.</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: #666;'>Trust isn't claimed. It's earned.</p>", unsafe_allow_html=True)
 
