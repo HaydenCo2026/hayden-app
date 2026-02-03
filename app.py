@@ -284,11 +284,15 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Display logo
-st.image("logo.jpg", width=120)
+# Centered branding
+left_co, cent_co, last_co = st.columns([1, 2, 1])
 
-st.title("Hayden Care")
-st.caption("Childcare Certification Support")
+with cent_co:
+    st.image("logo.jpg", use_container_width=True)
+    st.markdown("<h1 style='text-align: center;'>Hayden</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: gray;'>Your Partner in Child Safety</p>", unsafe_allow_html=True)
+
+st.divider()
 
 # --- PHOTO SUPPORT SIDEBAR ---
 with st.sidebar:
