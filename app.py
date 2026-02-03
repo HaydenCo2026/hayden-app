@@ -1,5 +1,6 @@
 import os
 import base64
+import time
 import streamlit as st
 import anthropic
 from pathlib import Path
@@ -221,10 +222,26 @@ def handle_not_found(query: str):
 # --- STREAMLIT UI ---
 
 st.set_page_config(
-    page_title="Hayden | Child Safety & Care",
+    page_title="Hayden",
     page_icon="logo.jpg",
     layout="centered",
 )
+
+# --- SPLASH SCREEN ---
+if "splashed" not in st.session_state:
+    with st.empty():
+        st.image("logo.jpg", width=250)
+        progress_bar = st.progress(0)
+        st.write("### Initializing Hayden Security Protocol...")
+
+        for percent_complete in range(100):
+            time.sleep(0.02)
+            progress_bar.progress(percent_complete + 1)
+
+        st.success("Identity Verified. Welcome.")
+        time.sleep(1)
+        st.session_state.splashed = True
+        st.rerun()
 
 # Custom CSS for seamless black theme and hidden avatars
 st.markdown("""
@@ -268,9 +285,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Display logo
-st.image("logo.jpg", width=150)
+st.image("logo.jpg", width=120)
 
-st.title("Welcome to Hayden")
+st.title("Hayden Care")
 st.caption("Childcare Certification Support")
 
 # --- PHOTO SUPPORT SIDEBAR ---
