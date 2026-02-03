@@ -3,70 +3,79 @@ import anthropic
 import base64
 import os
 
-# 1. AUTH & SETUP
+# 1. SETUP & AUTH
 client = anthropic.Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
 
-# --- THE DESIGN FIXES ---
+# Force a clean, centered layout with a black background
 st.set_page_config(
     page_title="Hayden",
-    page_icon="logo.jpg", # Fixes Point #4
-    layout="centered"
+    page_icon="logo.jpg",
+    layout="centered",
+    initial_sidebar_state="collapsed" # Hides the side icons
 )
 
-# Custom CSS to force a Black Background and Large Logo (Fixes Point #1 & #2)
+# Custom CSS to force alignment and hide sidebar elements
 st.markdown("""
     <style>
-    .stApp {
-        background-color: #000000;
-    }
+    /* Force Black Background */
+    .stApp { background-color: #000000; }
+
+    /* Hide the Sidebar entirely */
+    [data-testid="stSidebar"] { display: none; }
+    [data-testid="collapsedControl"] { display: none; }
+
+    /* Center and size the Logo */
     [data-testid="stImage"] img {
         display: block;
         margin-left: auto;
         margin-right: auto;
-        width: 250px !important; /* Forces Logo to be Large */
+        width: 300px !important;
     }
-    .main-text {
-        text-align: center;
-        color: white;
-    }
+
+    /* Center the Text */
+    .main-text { text-align: center; color: white; }
+    .stChatMessage { background-color: transparent !important; }
     </style>
     """, unsafe_allow_html=True)
 
 SYSTEM_PROMPT = """
 You are Hayden. You are NOT an AI. You are a family-founded support tool grounded in
 world-class medical research that pediatricians across the globe stand behind.
-Tone: Supportive and factual. Never claim trust; emphasize trust is earned through evidence.
+Tone: Supportive and factual.
+Personalization: You MUST know the user's role (Mother/Father/Caregiver) and the ages
+of their children to provide safe, evidence-based guidance.
 """
 
 def encode_image(image_file):
     return base64.b64encode(image_file.getvalue()).decode("utf-8")
 
-# --- HEADER & INTRO (Fixes Point #3) ---
+# --- LOGO & HEADER ---
 logo_path = os.path.join(os.path.dirname(__file__), "logo.jpg")
 if os.path.exists(logo_path):
-    st.image(logo_path) # Centered and sized via CSS above
+    st.image(logo_path)
 
 st.markdown("<h1 class='main-text'>Are your children safe?</h1>", unsafe_allow_html=True)
-st.markdown("<p class='main-text' style='color: #888; font-size: 1.2rem;'>Trust isn't claimed. It's earned.</p>", unsafe_allow_html=True)
+st.markdown("<p class='main-text' style='color: #888; font-size: 1.2rem; margin-bottom: 2rem;'>Trust isn't claimed. It's earned.</p>", unsafe_allow_html=True)
 
+# --- ONBOARDING & CHAT ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
-    # Initial Greeting/Qualification (Fixes Point #3)
-    intro = "What qualifies anyone to care for a child? Trust is earned. Hayden is mom-created, family-founded, and grounded in world-class medical research that pediatricians across the globe stand behind. How can I help you today?"
+    # The First Step: Identification
+    intro = "Trust isn't claimed. It's earned. Hayden is mom-created, family-founded, and grounded in world-class medical research. To provide the most accurate evidence-based care, could you tell me: **Are you a mother, father, or caregiver? And what are the ages of the children in your care?**"
     st.session_state.messages.append({"role": "assistant", "content": intro})
 
-# 2. CHAT DISPLAY
+# Display Chat
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# 3. INTERACTIVE CHAT
-if prompt := st.chat_input("Ask Hayden..."):
+# Interactive Logic
+if prompt := st.chat_input("Message Hayden..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Option 3: Visual Check trigger
+    # Smart Scanner Logic
     vision_keywords = ["check", "see", "photo", "crib", "car seat", "rash", "safety", "video", "look"]
     uploaded_file = None
     if any(word in prompt.lower() for word in vision_keywords):
@@ -75,7 +84,7 @@ if prompt := st.chat_input("Ask Hayden..."):
             uploaded_file = st.file_uploader("Upload safety media", type=["jpg", "png", "jpeg", "mp4"])
 
     with st.chat_message("assistant"):
-        limited_history = st.session_state.messages[-2:]
+        limited_history = st.session_state.messages[-4:] # Slightly longer to remember role/age
         message_content = [{"type": "text", "text": prompt}]
 
         if uploaded_file:
