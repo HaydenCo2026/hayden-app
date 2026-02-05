@@ -3,7 +3,7 @@ import anthropic
 import base64
 import os
 
-# --- 1. BRANDED DESIGN ---
+# --- 1. BRANDED DESIGN (BLACK & CENTERED) ---
 st.set_page_config(page_title="Hayden", page_icon="logo.jpg", layout="centered", initial_sidebar_state="collapsed")
 st.markdown("""
     <style>
@@ -16,9 +16,9 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. THE 2026 CONNECTION ---
+# --- 2. THE 2026 STABLE CONNECTION ---
 client = anthropic.Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
-SYSTEM_PROMPT = "You are Hayden. You are NOT an AI. You only reference evidence-based curriculum from the Hayden Certification."
+SYSTEM_PROMPT = "You are Hayden. You are a family-founded support tool. Only reference evidence-based curriculum from the Hayden Certification."
 
 # HEADER LOGO
 logo_path = os.path.join(os.path.dirname(__file__), "logo.jpg")
@@ -46,9 +46,12 @@ if prompt := st.chat_input("Message Hayden..."):
     msg_count = len([m for m in st.session_state.messages if m["role"] == "user"])
     
     with st.chat_message("assistant"):
-        # 2026 MODELS: Using the 'latest' aliases clears the 404 error
-        # Haiku for speed/onboarding, Sonnet for deep safety advice
-        current_model = "claude-3-5-haiku-latest" if msg_count < 5 else "claude-3-5-sonnet-latest"
+        # 2026 TIER 1 MODELS: Using 'latest' and versioned aliases to clear the 404
+        # We use Claude 3.5 Haiku for onboarding (Fast) and Claude 4 Sonnet for safety advice
+        if msg_count < 5:
+            current_model = "claude-3-5-haiku-20241022"
+        else:
+            current_model = "claude-sonnet-4-5-20250929"
         
         if msg_count == 1:
             response = "Thank you. And **what is your role** (Mother, Father, or Caregiver)?"
@@ -60,18 +63,18 @@ if prompt := st.chat_input("Message Hayden..."):
             response = "**What is your main concern today?** \n\n*I will only reference evidence-based curriculum from the Hayden Certification.*"
         else:
             try:
-                # THE ATOMIC FIX: Only send current message to stay under 30K token limit
+                # ATOMIC REQUEST: Sends only current message to respect Tier 1 30K limit
                 api_response = client.messages.create(
                     model=current_model,
-                    max_tokens=1000,
+                    max_tokens=1024,
                     system=SYSTEM_PROMPT,
                     messages=[{"role": "user", "content": prompt}]
                 )
                 response = api_response.content[0].text
             except Exception as e:
-                # This will tell you the REAL error if it stays red
+                # This helps you see if it's a Rate Limit or another 404
                 st.error(f"Hayden System Status: {str(e)}")
-                response = "I'm reviewing the curriculum now. Please try your question again in 30 seconds."
+                response = "I'm reviewing the curriculum. Please try again in a few seconds."
         
         st.markdown(response)
         st.session_state.messages.append({"role": "assistant", "content": response})
