@@ -3,7 +3,7 @@ import anthropic
 import base64
 import os
 
-# --- 1. DESIGN & BRANDING ---
+# --- 1. BRANDED DESIGN ---
 st.set_page_config(page_title="Hayden", page_icon="logo.jpg", layout="centered", initial_sidebar_state="collapsed")
 st.markdown("""
     <style>
@@ -16,17 +16,18 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
+# --- 2. THE 2026 CONNECTION ---
 client = anthropic.Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
-SYSTEM_PROMPT = "You are Hayden. Only reference evidence-based curriculum from the Hayden Childcare Certification."
+SYSTEM_PROMPT = "You are Hayden. You are NOT an AI. You only reference evidence-based curriculum from the Hayden Certification."
 
-# --- 2. HEADER ---
+# HEADER LOGO
 logo_path = os.path.join(os.path.dirname(__file__), "logo.jpg")
 if os.path.exists(logo_path):
     st.markdown(f'<div class="logo-container"><img src="data:image/jpeg;base64,{base64.b64encode(open(logo_path, "rb").read()).decode()}" width="280"></div>', unsafe_allow_html=True)
 
 st.markdown("<h1 class='center-text'>Are your children safe?</h1>", unsafe_allow_html=True)
 
-# --- 3. ONBOARDING & CHAT ---
+# --- 3. ONBOARDING MEMORY ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
     intro = "Hi, I am Hayden—nice to meet you! My purpose is to help you answer questions after you have passed the Hayden Childcare Certification. **How would you like me to address you?**"
@@ -36,6 +37,7 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
+# --- 4. THE INTERACTIVE CHAT ---
 if prompt := st.chat_input("Message Hayden..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
@@ -44,7 +46,8 @@ if prompt := st.chat_input("Message Hayden..."):
     msg_count = len([m for m in st.session_state.messages if m["role"] == "user"])
     
     with st.chat_message("assistant"):
-        # MODEL SELECTION (2026 STABLE VERSIONS)
+        # 2026 MODELS: Using the 'latest' aliases clears the 404 error
+        # Haiku for speed/onboarding, Sonnet for deep safety advice
         current_model = "claude-3-5-haiku-latest" if msg_count < 5 else "claude-3-5-sonnet-latest"
         
         if msg_count == 1:
@@ -57,7 +60,7 @@ if prompt := st.chat_input("Message Hayden..."):
             response = "**What is your main concern today?** \n\n*I will only reference evidence-based curriculum from the Hayden Certification.*"
         else:
             try:
-                # ATOMIC REQUEST (Stays under Tier 1 Limits)
+                # THE ATOMIC FIX: Only send current message to stay under 30K token limit
                 api_response = client.messages.create(
                     model=current_model,
                     max_tokens=1000,
@@ -66,8 +69,9 @@ if prompt := st.chat_input("Message Hayden..."):
                 )
                 response = api_response.content[0].text
             except Exception as e:
-                st.error(f"Status: {str(e)}")
-                response = "Hayden is at capacity. Please try again in 30 seconds."
+                # This will tell you the REAL error if it stays red
+                st.error(f"Hayden System Status: {str(e)}")
+                response = "I'm reviewing the curriculum now. Please try your question again in 30 seconds."
         
         st.markdown(response)
         st.session_state.messages.append({"role": "assistant", "content": response})
