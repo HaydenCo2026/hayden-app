@@ -44,8 +44,8 @@ if prompt := st.chat_input("Message Hayden..."):
     msg_count = len([m for m in st.session_state.messages if m["role"] == "user"])
     
     with st.chat_message("assistant"):
-        # UPDATED: Using 'sonnet-latest' to clear the 404 error
-        current_model = "claude-3-haiku-20240307" if msg_count < 5 else "claude-3-5-sonnet-latest"
+        # MODEL SELECTION (2026 STABLE VERSIONS)
+        current_model = "claude-3-5-haiku-latest" if msg_count < 5 else "claude-3-5-sonnet-latest"
         
         if msg_count == 1:
             response = "Thank you. And **what is your role** (Mother, Father, or Caregiver)?"
@@ -57,10 +57,10 @@ if prompt := st.chat_input("Message Hayden..."):
             response = "**What is your main concern today?** \n\n*I will only reference evidence-based curriculum from the Hayden Certification.*"
         else:
             try:
-                # ATOMIC REQUEST: Sends only current message to stay under Tier 1 30K limit
+                # ATOMIC REQUEST (Stays under Tier 1 Limits)
                 api_response = client.messages.create(
                     model=current_model,
-                    max_tokens=800,
+                    max_tokens=1000,
                     system=SYSTEM_PROMPT,
                     messages=[{"role": "user", "content": prompt}]
                 )
