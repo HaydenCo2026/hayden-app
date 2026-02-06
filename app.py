@@ -16,17 +16,15 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. THE HANDSHAKE ---
-# If this fails, the red box will contain a "Detailed Status"
-try:
-    client = anthropic.Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
-except Exception as e:
-    st.error(f"AUTHENTICATION ERROR: Check your Streamlit Secrets. {str(e)}")
+# --- 2. AUTHENTICATION ---
+if "ANTHROPIC_API_KEY" not in st.secrets:
+    st.error("MISSING API KEY: Go to Streamlit Settings > Secrets and add your key.")
     st.stop()
 
+client = anthropic.Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
 SYSTEM_PROMPT = "You are Hayden. Only reference evidence-based curriculum from the Hayden Childcare Certification."
 
-# --- 3. HEADER & LOGO ---
+# --- 3. THE HEADER LOGO ---
 logo_path = os.path.join(os.path.dirname(__file__), "logo.jpg")
 if os.path.exists(logo_path):
     with open(logo_path, "rb") as f:
@@ -53,8 +51,8 @@ if prompt := st.chat_input("Message Hayden..."):
     msg_count = len([m for m in st.session_state.messages if m["role"] == "user"])
     
     with st.chat_message("assistant"):
-        # MODEL SELECTION: 2026 Tier 1 standard
-        current_model = "claude-3-5-sonnet-latest"
+        # MODEL SELECTION: FORCED TO HAIKU FOR TESTING
+        current_model = "claude-3-haiku-20240307"
         
         if msg_count == 1:
             response = "Thank you. And **what is your role** (Mother, Father, or Caregiver)?"
@@ -66,7 +64,7 @@ if prompt := st.chat_input("Message Hayden..."):
             response = "**What is your main concern today?**"
         else:
             try:
-                # The Request
+                # The Request to Haiku
                 api_response = client.messages.create(
                     model=current_model,
                     max_tokens=1024,
@@ -75,9 +73,9 @@ if prompt := st.chat_input("Message Hayden..."):
                 )
                 response = api_response.content[0].text
             except Exception as e:
-                # THIS WILL KILL THE SILENT RED BOX:
-                st.error(f"HAYDEN SYSTEM STATUS: {str(e)}")
-                response = "I am currently updating my records. Please try again in 30 seconds."
+                # This will print the exact reason for the red box on the screen
+                st.error(f"HAYDEN TEST STATUS: {str(e)}")
+                response = "Connection test in progress..."
         
         st.markdown(response)
         st.session_state.messages.append({"role": "assistant", "content": response})
