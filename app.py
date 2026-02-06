@@ -3,7 +3,7 @@ import anthropic
 import base64
 import os
 
-# --- 1. DESIGN & BRANDING (Logo and Center Styling) ---
+# --- 1. DESIGN & BRANDING ---
 st.set_page_config(page_title="Hayden", page_icon="logo.jpg", layout="centered", initial_sidebar_state="collapsed")
 
 st.markdown("""
@@ -24,15 +24,15 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. THE CONNECTION ---
+# --- 2. AUTHENTICATION ---
 if "ANTHROPIC_API_KEY" not in st.secrets:
-    st.error("Missing API Key in Secrets!")
+    st.error("MISSING API KEY: Please check your Streamlit Secrets.")
     st.stop()
 
 client = anthropic.Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
 SYSTEM_PROMPT = "You are Hayden. Only reference evidence-based curriculum from the Hayden Childcare Certification."
 
-# --- 3. THE HEADER LOGO ---
+# --- 3. HEADER & LOGO ---
 logo_path = os.path.join(os.path.dirname(__file__), "logo.jpg")
 if os.path.exists(logo_path):
     with open(logo_path, "rb") as f:
@@ -41,22 +41,17 @@ if os.path.exists(logo_path):
 
 st.markdown("<h1 class='center-text'>Are your children safe?</h1>", unsafe_allow_html=True)
 
-# --- 4. THE ONBOARDING LOGIC ---
+# --- 4. CHAT HISTORY ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
-    intro = (
-        "Hi, I am Hayden—nice to meet you! My purpose is to help you answer questions "
-        "after you have passed the Hayden Childcare Certification. Let's get started. "
-        "**How would you like me to address you?**"
-    )
+    intro = "Hi, I am Hayden—nice to meet you! My purpose is to help you answer questions after you have passed the Hayden Childcare Certification. **How would you like me to address you?**"
     st.session_state.messages.append({"role": "assistant", "content": intro})
 
-# Display Chat History
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# --- 5. THE CHAT FLOW ---
+# --- 5. THE UPDATED MODEL LOGIC ---
 if prompt := st.chat_input("Message Hayden..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
@@ -65,8 +60,8 @@ if prompt := st.chat_input("Message Hayden..."):
     msg_count = len([m for m in st.session_state.messages if m["role"] == "user"])
     
     with st.chat_message("assistant"):
-        # UPDATED: Using the 2026-safe models
-        current_model = "claude-3-5-haiku-20241022" if msg_count < 5 else "claude-3-5-sonnet-20241022"
+        # CHANGED: Using the most stable 'latest' alias as requested
+        current_model = "claude-3-5-sonnet-latest"
         
         if msg_count == 1:
             response = "Thank you. And **what is your role** (Mother, Father, or Caregiver)?"
@@ -75,14 +70,10 @@ if prompt := st.chat_input("Message Hayden..."):
         elif msg_count == 3:
             response = "**Who is in your care, and how old are they?**"
         elif msg_count == 4:
-            response = (
-                "**What is your main concern today?** \n\n"
-                "*I want you to understand that I will only reference evidence-based, medically proven, "
-                "and relevant curriculum found in the Hayden Childcare Certification.*"
-            )
+            response = "**What is your main concern today?**"
         else:
             try:
-                # The 'Atomic' call: only sends current message to stay under Tier 1 limits
+                # Direct call to the new model
                 api_response = client.messages.create(
                     model=current_model,
                     max_tokens=1024,
@@ -91,8 +82,9 @@ if prompt := st.chat_input("Message Hayden..."):
                 )
                 response = api_response.content[0].text
             except Exception as e:
-                st.error(f"Status Check: {str(e)}")
-                response = "Hayden is briefly at capacity. Please try again in 30 seconds."
+                # This will tell us if it's still a 404 or a new error
+                st.error(f"Hayden System Status: {str(e)}")
+                response = "I am currently syncing with the latest curriculum. Please try again in 30 seconds."
         
         st.markdown(response)
         st.session_state.messages.append({"role": "assistant", "content": response})
