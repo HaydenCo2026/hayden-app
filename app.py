@@ -22,7 +22,21 @@ if "ANTHROPIC_API_KEY" not in st.secrets:
     st.stop()
 
 client = anthropic.Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
-SYSTEM_PROMPT = "You are Hayden. Only reference evidence-based curriculum from the Hayden Childcare Certification."
+
+# --- ROLE-BASED SYSTEM PROMPTS ---
+BASE_PROMPT = "You are Hayden. Only reference evidence-based curriculum from the Hayden Childcare Certification."
+
+PARENT_PROMPT = f"""{BASE_PROMPT}
+
+You are speaking with a parent. Use college-level vocabulary and analysis. You can use technical terms,
+cite research directly, and provide nuanced explanations. Assume they can handle complexity and want
+depth in your answers."""
+
+CAREGIVER_PROMPT = f"""{BASE_PROMPT}
+
+You are speaking with a caregiver or nanny. Use clear, accessible language at a 10th-grade reading level.
+Avoid jargon and technical terms—if you must use them, explain them simply. Focus on practical,
+actionable advice. Keep sentences shorter and explanations straightforward."""
 
 # --- 3. THE HEADER LOGO ---
 logo_path = os.path.join(os.path.dirname(__file__), "logo.jpg")
@@ -36,6 +50,7 @@ st.markdown("<h1 class='center-text'>Are your children safe?</h1>", unsafe_allow
 # --- 4. ONBOARDING & CHAT ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
+    st.session_state.user_role = None  # Will be "parent" or "caregiver"
     intro = "Hi, I am Hayden—nice to meet you! My purpose is to help you answer questions after you have passed the Hayden Childcare Certification. **How would you like me to address you?**"
     st.session_state.messages.append({"role": "assistant", "content": intro})
 
@@ -57,6 +72,12 @@ if prompt := st.chat_input("Message Hayden..."):
         if msg_count == 1:
             response = "Thank you. And **what is your role** (Mother, Father, or Caregiver)?"
         elif msg_count == 2:
+            # Detect role from response
+            role_input = prompt.lower()
+            if "mother" in role_input or "father" in role_input or "mom" in role_input or "dad" in role_input or "parent" in role_input:
+                st.session_state.user_role = "parent"
+            else:
+                st.session_state.user_role = "caregiver"
             response = "Understood. **How old are you?**"
         elif msg_count == 3:
             response = "**Who is in your care, and how old are they?**"
@@ -64,11 +85,17 @@ if prompt := st.chat_input("Message Hayden..."):
             response = "**What is your main concern today?**"
         else:
             try:
+                # Select system prompt based on user role
+                if st.session_state.user_role == "parent":
+                    system_prompt = PARENT_PROMPT
+                else:
+                    system_prompt = CAREGIVER_PROMPT
+
                 # The Request to Haiku
                 api_response = client.messages.create(
                     model=current_model,
                     max_tokens=1024,
-                    system=SYSTEM_PROMPT,
+                    system=system_prompt,
                     messages=[{"role": "user", "content": prompt}]
                 )
                 response = api_response.content[0].text
