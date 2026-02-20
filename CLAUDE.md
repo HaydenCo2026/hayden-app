@@ -25,6 +25,21 @@ API keys are stored in Streamlit Cloud dashboard (Settings > Secrets), not in th
 
 ## Features
 
+### Onboarding Profile
+User data is collected during onboarding and included in every AI response:
+
+| Step | Question | Stored As |
+|------|----------|-----------|
+| 1 | "How would you like me to address you?" | `name` |
+| 2 | "What is your role?" | `role` + `role_title` |
+| 3 | "How old are you?" | `age` |
+| 4 | "Who is in your care, and how old are they?" | `children` |
+| 5 | "What is your main concern today?" | `main_concern` |
+
+The full profile is injected into the system prompt so Hayden can personalize responses (use their name, reference their children, remember their concern).
+
+**Code location**: `app.py` lines 54-61 (profile init), 83-106 (capture), 109-119 (injection)
+
 ### Role-Based Language Adaptation
 The app adjusts its language complexity based on the user's role (detected during onboarding):
 
@@ -33,7 +48,7 @@ The app adjusts its language complexity based on the user's role (detected durin
 | Parent | mother, father, mom, dad, parent | College-level vocabulary, technical terms, nuanced explanations |
 | Caregiver | anything else (nanny, babysitter, etc.) | 10th-grade reading level, no jargon, practical advice |
 
-**Code location**: `app.py` lines 26-39 (prompts), 75-80 (detection), 89-92 (selection)
+**Code location**: `app.py` lines 27-40 (prompts), 88-94 (detection), 121-125 (selection)
 
 ### UI Styling
 - **User messages**: Green (#4CAF50) for visual distinction
