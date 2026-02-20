@@ -51,7 +51,14 @@ st.markdown("<h1 class='center-text'>Are your children safe?</h1>", unsafe_allow
 # --- 4. ONBOARDING & CHAT ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
-    st.session_state.user_role = None  # Will be "parent" or "caregiver"
+    st.session_state.user_profile = {
+        "name": None,
+        "role": None,           # "parent" or "caregiver"
+        "role_title": None,     # Original response (e.g., "Mother", "Nanny")
+        "age": None,
+        "children": None,
+        "main_concern": None
+    }
     intro = "Hi, I am Hayden—nice to meet you! My purpose is to help you answer questions after you have passed the Hayden Childcare Certification. **How would you like me to address you?**"
     st.session_state.messages.append({"role": "assistant", "content": intro})
 
@@ -74,26 +81,51 @@ if prompt := st.chat_input("Message Hayden..."):
         current_model = "claude-3-haiku-20240307"
         
         if msg_count == 1:
+            # Store name
+            st.session_state.user_profile["name"] = prompt.strip()
             response = "Thank you. And **what is your role** (Mother, Father, or Caregiver)?"
         elif msg_count == 2:
-            # Detect role from response
+            # Detect and store role
             role_input = prompt.lower()
+            st.session_state.user_profile["role_title"] = prompt.strip()
             if "mother" in role_input or "father" in role_input or "mom" in role_input or "dad" in role_input or "parent" in role_input:
-                st.session_state.user_role = "parent"
+                st.session_state.user_profile["role"] = "parent"
             else:
-                st.session_state.user_role = "caregiver"
+                st.session_state.user_profile["role"] = "caregiver"
             response = "Understood. **How old are you?**"
         elif msg_count == 3:
+            # Store age
+            st.session_state.user_profile["age"] = prompt.strip()
             response = "**Who is in your care, and how old are they?**"
         elif msg_count == 4:
+            # Store children info
+            st.session_state.user_profile["children"] = prompt.strip()
             response = "**What is your main concern today?**"
-        else:
+        elif msg_count == 5:
+            # Store main concern and give first AI response
+            st.session_state.user_profile["main_concern"] = prompt.strip()
+        if msg_count >= 5:
             try:
-                # Select system prompt based on user role
-                if st.session_state.user_role == "parent":
-                    system_prompt = PARENT_PROMPT
+                # Build profile context
+                profile = st.session_state.user_profile
+                profile_context = f"""
+USER PROFILE:
+- Name: {profile['name']}
+- Role: {profile['role_title']}
+- Age: {profile['age']}
+- Children in care: {profile['children']}
+- Main concern: {profile['main_concern']}
+
+Use this context to personalize your responses. Address them by name when appropriate."""
+
+                # Select base prompt based on user role
+                if profile["role"] == "parent":
+                    base_prompt = PARENT_PROMPT
                 else:
-                    system_prompt = CAREGIVER_PROMPT
+                    base_prompt = CAREGIVER_PROMPT
+
+                # Combine base prompt with profile context
+                system_prompt = f"{base_prompt}\n\n{profile_context}"
 
                 # The Request to Haiku
                 api_response = client.messages.create(
