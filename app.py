@@ -13,6 +13,7 @@ st.markdown("""
     .logo-container { display: flex; justify-content: center; align-items: center; width: 100%; padding-top: 2rem; padding-bottom: 2rem; }
     .center-text { text-align: center; color: white; font-family: 'Inter', sans-serif; }
     [data-testid="stChatMessage"] { background-color: transparent !important; padding-left: 0px !important; }
+    .user-message { color: #4CAF50 !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -56,12 +57,15 @@ if "messages" not in st.session_state:
 
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+        if message["role"] == "user":
+            st.markdown(f'<span class="user-message">{message["content"]}</span>', unsafe_allow_html=True)
+        else:
+            st.markdown(message["content"])
 
 if prompt := st.chat_input("Message Hayden..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
-        st.markdown(prompt)
+        st.markdown(f'<span class="user-message">{prompt}</span>', unsafe_allow_html=True)
 
     msg_count = len([m for m in st.session_state.messages if m["role"] == "user"])
     
