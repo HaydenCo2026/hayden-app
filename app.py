@@ -117,7 +117,7 @@ USER PROFILE:
 - Children in care: {profile['children']}
 - Main concern: {profile['main_concern']}
 
-Use this context to personalize your responses. Address them by name when appropriate."""
+Always address the user by their name ({profile['name']}). Personalize your responses using their profile information."""
 
                 # Select base prompt based on user role
                 if profile["role"] == "parent":
