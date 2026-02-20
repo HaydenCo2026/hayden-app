@@ -46,7 +46,7 @@ The app adjusts its language complexity based on the user's role (detected durin
 | Role | Detection Keywords | Language Level |
 |------|-------------------|----------------|
 | Parent | mother, father, mom, dad, parent | College-level vocabulary, technical terms, nuanced explanations |
-| Caregiver | anything else (nanny, babysitter, etc.) | 10th-grade reading level, no jargon, practical advice |
+| Caregiver | anyone else (grandparents, aunts, uncles, siblings, nannies, babysitters, etc.) | 10th-grade reading level, no jargon, practical advice |
 
 **Code location**: `app.py` lines 27-40 (prompts), 88-94 (detection), 121-125 (selection)
 
