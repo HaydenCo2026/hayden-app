@@ -48,6 +48,8 @@ The app adjusts its language complexity based on the user's role (detected durin
 | Parent | mother, father, mom, dad, parent | College-level vocabulary, technical terms, nuanced explanations |
 | Caregiver | anyone else (grandparents, aunts, uncles, siblings, nannies, babysitters, etc.) | 10th-grade reading level, no jargon, practical advice |
 
+**Note**: Caregiver is anyone who isn't a parent. This includes grandparents, aunts, uncles, siblings, nannies, babysitters, and any other non-parent caring for a child.
+
 **Code location**: `app.py` lines 27-40 (prompts), 88-94 (detection), 121-125 (selection)
 
 ### UI Styling
