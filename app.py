@@ -31,7 +31,7 @@ if os.path.exists(logo_path):
         data = base64.b64encode(f.read()).decode()
     st.markdown(f'<div class="logo-container"><img src="data:image/jpeg;base64,{data}" width="280"></div>', unsafe_allow_html=True)
 
-st.markdown("<h1 class='center-text'>Are your children safe? 123</h1>", unsafe_allow_html=True)
+st.markdown("<h1 class='center-text'>Are your children safe?</h1>", unsafe_allow_html=True)
 
 # --- 4. ONBOARDING & CHAT ---
 if "messages" not in st.session_state:
