@@ -38,6 +38,8 @@ User data is collected during onboarding and included in every AI response:
 
 The full profile is injected into the system prompt so Hayden can personalize responses (use their name, reference their children, remember their concern).
 
+**Name usage**: Hayden always addresses the user by the name they provided in step 1. This is enforced in the system prompt.
+
 **Code location**: `app.py` lines 54-61 (profile init), 83-106 (capture), 109-119 (injection)
 
 ### Role-Based Language Adaptation
