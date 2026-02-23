@@ -40,6 +40,13 @@ The full profile is injected into the system prompt so Hayden can personalize re
 
 **Name usage**: Hayden always addresses the user by the name they provided in step 1. This is enforced in the system prompt.
 
+### Curriculum Fallback
+Hayden first tries to answer from the Hayden Childcare Certification curriculum. If the answer isn't available, it asks for permission before using broader knowledge:
+
+> "Based on the Hayden Curriculum, I do not have this specific answer. Are you comfortable with me accessing the wider vetted medical, government and deeply researched findings?"
+
+Only after user confirmation will Hayden access wider sources (medical, government, research).
+
 **Code location**: `app.py` lines 54-61 (profile init), 83-106 (capture), 109-119 (injection)
 
 ### Role-Based Language Adaptation
