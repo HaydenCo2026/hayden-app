@@ -26,19 +26,42 @@ API keys are stored in Streamlit Cloud dashboard (Settings > Secrets), not in th
 ## Features
 
 ### Onboarding Profile
-User data is collected during onboarding and included in every AI response:
+User data is collected during onboarding and included in every AI response.
+
+**Parent flow**: name → role → age → children → concern → chat
+
+**Caregiver flow**: name → role → **persona** → age → children → concern → chat
 
 | Step | Question | Stored As |
 |------|----------|-----------|
 | 1 | "How would you like me to address you?" | `name` |
 | 2 | "What is your role?" | `role` + `role_title` |
-| 3 | "How old are you?" | `age` |
-| 4 | "Who is in your care, and how old are they?" | `children` |
-| 5 | "What is your main concern today?" | `main_concern` |
+| 3 | "Which best describes you?" (caregivers only) | `persona` |
+| 4 | "How old are you?" | `age` |
+| 5 | "Who is in your care, and how old are they?" | `children` |
+| 6 | "What is your main concern today?" | `main_concern` |
 
 The full profile is injected into the system prompt so Hayden can personalize responses (use their name, reference their children, remember their concern).
 
 **Name usage**: Hayden always addresses the user by the name they provided in step 1. This is enforced in the system prompt.
+
+### Caregiver Personas
+Caregivers get an additional question to identify their specific type. Each persona gets tailored guidance:
+
+| Persona | How Hayden Adapts |
+|---------|------------------|
+| Nanny/Au Pair | Professional language, respects their training and experience |
+| Babysitter | Very simple and actionable, reassuring (may be younger/less experienced) |
+| Grandparent | Honors their experience while gently sharing current guidelines |
+| Aunt/Uncle | Balances respect for parents' wishes with practical help |
+| Older Sibling | Simple steps, encouraging, calming (may feel scared or overwhelmed) |
+| Daycare Worker | Efficiency tips, group management focus |
+| Foster Parent | Trauma-informed, sensitive to system navigation and trust-building |
+| Stepparent | Sensitive to blended family dynamics, earning trust, respecting boundaries |
+| Godparent/Family Friend | Helps them honor parents' wishes, builds confidence |
+| Other Relative | Considers household dynamics and daily involvement |
+
+**Code location**: `app.py` lines 47-59 (persona guidance), 132-156 (detection)
 
 ### Curriculum Fallback
 Hayden first tries to answer from the Hayden Childcare Certification curriculum. If the answer isn't available, it asks for permission before using broader knowledge:
