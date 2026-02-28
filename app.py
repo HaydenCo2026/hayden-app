@@ -14,6 +14,9 @@ st.markdown("""
     .center-text { text-align: center; color: white; font-family: 'Inter', sans-serif; }
     [data-testid="stChatMessage"] { background-color: transparent !important; padding-left: 0px !important; }
     .user-message { color: #4CAF50 !important; }
+    .reset-btn { display: flex; justify-content: center; margin-bottom: 1rem; }
+    .reset-btn button { background: transparent; border: 1px solid #333; color: #666; font-size: 0.75rem; padding: 0.3rem 0.8rem; border-radius: 15px; cursor: pointer; }
+    .reset-btn button:hover { border-color: #666; color: #999; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -66,6 +69,25 @@ if os.path.exists(logo_path):
     st.markdown(f'<div class="logo-container"><img src="data:image/jpeg;base64,{data}" width="280"></div>', unsafe_allow_html=True)
 
 st.markdown("<h1 class='center-text'>Are your children safe?</h1>", unsafe_allow_html=True)
+
+# --- RESET BUTTON ---
+def reset_conversation():
+    st.session_state.messages = []
+    st.session_state.onboarding_step = "name"
+    st.session_state.user_profile = {
+        "name": None,
+        "role": None,
+        "role_title": None,
+        "persona": None,
+        "age": None,
+        "children": None,
+        "main_concern": None
+    }
+
+col1, col2, col3 = st.columns([1, 1, 1])
+with col2:
+    if st.button("Start Over", on_click=reset_conversation, use_container_width=True):
+        st.rerun()
 
 # --- 4. ONBOARDING & CHAT ---
 if "messages" not in st.session_state:
