@@ -89,3 +89,4 @@ The app adjusts its language complexity based on the user's role (detected durin
 - **Assistant messages**: White (default)
 - **Background**: Black
 - **Avatars**: Hidden
+- **Reset button**: "Start Over" button centered below header - clears session and restarts onboarding
