@@ -4,9 +4,12 @@
 AI-powered childcare guidance app built with Streamlit and Claude API.
 
 ## Deployment
-- **Hosting**: Streamlit Cloud (auto-deploys from GitHub)
-- **Live URL**: https://hayden-childcare.streamlit.app
+- **Landing page**: https://haydenco2026.github.io/hayden-app/ (GitHub Pages - share this link)
+- **App URL**: https://hayden-childcare.streamlit.app (Streamlit Cloud)
 - **Repo**: git@github.com:HaydenCo2026/hayden-app.git
+
+### Social Sharing
+The landing page (index.html) has Open Graph meta tags so the bear logo shows as thumbnail when shared on iMessage, WhatsApp, Slack, LinkedIn, etc.
 
 ### To deploy
 Push to `main` branch - Streamlit Cloud picks up changes automatically.
